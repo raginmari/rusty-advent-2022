@@ -11,6 +11,7 @@ fn main()
     solve_1(input);
 }
 
+// TIL: 'traits' are (kind of) Rust's protocols (Swift) or interfaces (C#).
 fn solve_1<T>(input: Lines<T>) where T: BufRead
 {
     let mut max_calories = 0;
@@ -21,6 +22,7 @@ fn solve_1<T>(input: Lines<T>) where T: BufRead
             max_calories = max(max_calories, acc);
             acc = 0;
         } else {
+            // TIL: use 'turbofish' ::<i32> or the explicit type i32 to tell the compiler what to parse / the generic type.
             let calories = line.parse::<i32>().unwrap();
             acc += calories;
         }
