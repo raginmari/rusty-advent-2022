@@ -1,15 +1,18 @@
 use std::cmp::max;
 use std::fs::File;
-use std::io::{self, BufRead};
+use std::io::{self, BufRead, Lines};
 use std::path::Path;
 
 fn main()
 {
     // TIL: file paths are specified relative to the folder where Cargo.toml is located.
     let input_path = "res/input.txt";
-    
     let input = read_lines(input_path).expect("Should find puzzle input");
+    solve_1(input);
+}
 
+fn solve_1<T>(input: Lines<T>) where T: BufRead
+{
     let mut max_calories = 0;
     let mut acc = 0;
     for maybe_line in input {
