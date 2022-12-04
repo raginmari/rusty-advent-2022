@@ -7,10 +7,16 @@ fn main()
         .expect("Should find puzzle input")
         .map(|x| x.unwrap());
     
-    println!("The total score is {}", solve(input));
+    println!("The total score is {}", solve_star_2(input));
 }
 
-#[derive(PartialEq)]
+// Copy performs bit-wise copying. All constituents of Copy-able types must be Copy as well.
+// https://doc.rust-lang.org/stable/std/marker/trait.Copy.html
+
+// Clone defines a function that performs a type-specific clone. Clone is parent of Copy. Potentially more costly than Copy.
+// https://doc.rust-lang.org/stable/std/clone/trait.Clone.html
+
+#[derive(PartialEq, Clone, Copy)]
 enum Shape 
 {
     Rock,
@@ -20,7 +26,7 @@ enum Shape
 
 impl Shape
 {
-    fn from_char(s: &char) -> Shape 
+    fn from_char(s: char) -> Shape 
     {
         match s {
             'A' | 'X' => Shape::Rock,
@@ -29,22 +35,57 @@ impl Shape
             _ => panic!()
         }
     }
+
+    fn get_defeats(&self) -> Shape
+    {
+        match *self {
+            Shape::Rock => Shape::Scissors,
+            Shape::Paper => Shape::Rock,
+            Shape::Scissors => Shape::Paper
+        }
+    }
+
+    fn get_defeated_by(&self) -> Shape 
+    {
+        match *self {
+            Shape::Rock => Shape::Paper,
+            Shape::Paper => Shape::Scissors,
+            Shape::Scissors => Shape::Rock
+        }
+    }
 }
 
+#[allow(dead_code)]
 // TIL: requiring IntoIterator makes it possible to call the function with Vec as well as an Iterator
-fn solve<I>(input: I) -> i32 where I: IntoIterator<Item = String>
+fn solve_star_1<I>(input: I) -> i32 where I: IntoIterator<Item = String>
 {
     input.into_iter().map(|line| {
         let bytes = line.as_bytes();
-        let opponent = Shape::from_char(&(bytes[0] as char));
-        let me = Shape::from_char(&(bytes[2] as char));
-        value_of_symbol(&me) + points_for(&opponent, &me)
+        let opponent = Shape::from_char(bytes[0] as char);
+        let me = Shape::from_char(bytes[2] as char);
+        value_of_shape(&me) + points_for(&opponent, &me)
     }).sum()
 }
 
-fn value_of_symbol(symbol: &Shape) -> i32
+#[allow(dead_code)]
+fn solve_star_2<I>(input: I) -> i32 where I: IntoIterator<Item = String>
 {
-    match symbol {
+    input.into_iter().map(|line| {
+        let bytes = line.as_bytes();
+        let opponent = Shape::from_char(bytes[0] as char);
+        let me = match bytes[2] as char {
+            'X' => opponent.get_defeats(),
+            'Y' => opponent, // Performs copy because Shape is Copy
+            'Z' => opponent.get_defeated_by(),
+            _ => panic!()
+        };
+        value_of_shape(&me) + points_for(&opponent, &me)
+    }).sum()
+}
+
+fn value_of_shape(shape: &Shape) -> i32
+{
+    match shape {
         Shape::Rock => 1,
         Shape::Paper => 2,
         Shape::Scissors => 3
@@ -53,20 +94,8 @@ fn value_of_symbol(symbol: &Shape) -> i32
 
 fn points_for(opponent: &Shape, me: &Shape) -> i32
 {
-    match opponent {
-        // Lose
-        Shape::Rock if me == &Shape::Scissors => 0,
-        Shape::Paper if me == &Shape::Rock => 0,
-        Shape::Scissors if me == &Shape::Paper => 0,
-        
-        // Win
-        Shape::Rock if me == &Shape::Paper => 6,
-        Shape::Paper if me == &Shape::Scissors => 6,
-        Shape::Scissors if me == &Shape::Rock => 6,
-
-        // Draw
-        _ => 3
-    }
+    if me == opponent { return 3 }
+    if me.get_defeats() == *opponent { 6 } else { 0 }
 }
 
 mod tests
@@ -76,11 +105,20 @@ mod tests
     use super::*;
 
     #[test]
-    fn test_example_input()
+    fn test_example_star_1()
     {
         let lines = vec!["A Y", "B X", "C Z"];
         let input = lines.iter().map(|x| x.to_string());
-        let score = solve(input);
+        let score = solve_star_1(input);
         assert_eq!(score, 15);
+    }
+
+    #[test]
+    fn test_example_star_2()
+    {
+        let lines = vec!["A Y", "B X", "C Z"];
+        let input = lines.iter().map(|x| x.to_string());
+        let score = solve_star_2(input);
+        assert_eq!(score, 12);
     }
 }
