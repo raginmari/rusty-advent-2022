@@ -1,10 +1,7 @@
-use std::fs::File;
-use std::io::{self, BufRead};
-use std::path::Path;
-
-fn main() {
+fn main() 
+{
     let input_path = "res/input.txt";
-    let input = read_lines(input_path)
+    let input = tools::read_lines(input_path)
         .expect("Should find puzzle input")
         .map(|x| x.unwrap());
     
@@ -70,10 +67,17 @@ fn points_for(opponent: &Shape, me: &Shape) -> i32
     }
 }
 
-fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>> where P: AsRef<Path>
+mod tools
 {
-    let file = File::open(filename)?;
-    Ok(io::BufReader::new(file).lines())
+    use std::fs::File;
+    use std::io::{self, BufRead};
+    use std::path::Path;
+    
+    pub fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>> where P: AsRef<Path>
+    {
+        let file = File::open(filename)?;
+        Ok(io::BufReader::new(file).lines())
+    }
 }
 
 mod tests
