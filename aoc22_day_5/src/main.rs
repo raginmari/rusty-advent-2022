@@ -25,14 +25,6 @@ fn main() {
     println!("The result is {}", solve_star_2(ship, input));
 }
 
-#[derive(Debug, Copy, Clone)]
-struct Step
-{
-    count: usize,
-    from_stack: usize,
-    to_stack: usize
-}
-
 #[allow(dead_code)]
 fn solve_star_1<I>(mut ship: Ship, step_strings: I) -> String where I: IntoIterator<Item = String>
 {
@@ -88,6 +80,14 @@ fn create_step(step_string: &str) -> Step
         from_stack: captures.get(2).unwrap().as_str().parse::<usize>().unwrap() - 1,
         to_stack: captures.get(3).unwrap().as_str().parse::<usize>().unwrap() - 1
     }
+}
+
+#[derive(Debug, Copy, Clone)]
+struct Step
+{
+    count: usize,
+    from_stack: usize,
+    to_stack: usize
 }
 
 mod domain
